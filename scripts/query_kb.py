@@ -154,9 +154,12 @@ def search(textmap, titles, query, limit, context, doc_id=None, doc_title=None):
 
 def print_capabilities():
     """输出本技能的能力清单（与 /list 共用）。"""
-    tm = load_json(TEXTMAP_PATH)
     print("千星奇域知识库 · 能力清单")
-    print(f"知识库：{len(tm)} 篇官方文档全文快照\n")
+    try:
+        tm = load_json(TEXTMAP_PATH)
+        print(f"知识库：{len(tm)} 篇官方文档全文快照\n")
+    except (OSError, ValueError):
+        print("知识库：快照文件未就绪（能力清单仍可用）\n")
     for c in CAPABILITIES:
         print(f"[{c['command']}] {c['name']}")
         print(f"  说明：{c['desc']}")
