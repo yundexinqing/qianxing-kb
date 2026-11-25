@@ -20,6 +20,45 @@ SKILL_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEXTMAP_PATH = os.path.join(SKILL_DIR, "references", "textMap.json")
 CATALOG_PATH = os.path.join(SKILL_DIR, "references", "catalog.json")
 
+# 本技能对外暴露的能力清单，/list 与 --capabilities 共用同一份定义
+CAPABILITIES = [
+    {
+        "command": "/query",
+        "cli": 'python3 scripts/query_kb.py "检索词"',
+        "name": "知识库检索问答",
+        "desc": "拆解问题为多组关键词，检索 222 篇官方文档，按原文判定支持/受限/未找到并给证据",
+        "example": "/query 帮我查询一下是否支持2d游戏",
+    },
+    {
+        "command": "/list",
+        "cli": "python3 scripts/query_kb.py --capabilities",
+        "name": "列出本技能能力",
+        "desc": "列出全部可用命令、CLI 入口、知识库覆盖范围与数据快照信息",
+        "example": "/list",
+    },
+    {
+        "command": "/docs",
+        "cli": "python3 scripts/query_kb.py x --list-docs",
+        "name": "列出全部文档",
+        "desc": "输出 222 篇文档的 doc_id 与标题路径，用于定位目标文档",
+        "example": "python3 scripts/query_kb.py x --list-docs",
+    },
+    {
+        "command": "/raw",
+        "cli": "python3 scripts/query_kb.py x --raw-doc <doc_id>",
+        "name": "读取单篇全文",
+        "desc": "输出指定 doc_id 的官方文档全文，用于需要完整上下文的场景",
+        "example": "python3 scripts/query_kb.py x --raw-doc mhs2w008wf14",
+    },
+    {
+        "command": "/update",
+        "cli": "重新下载 references/ 下三个 JSON",
+        "name": "更新知识库快照",
+        "desc": "从官方数据源重新拉取目录与正文，脚本与 SKILL.md 无需改动",
+        "example": "见 README「更新知识库快照」章节",
+    },
+]
+
 
 def load_json(path):
     with open(path, "r", encoding="utf-8") as f:
@@ -113,9 +152,23 @@ def search(textmap, titles, query, limit, context, doc_id=None, doc_title=None):
     return results[:limit]
 
 
+def print_capabilities():
+    """输出本技能的能力清单（与 /list 共用）。"""
+    tm = load_json(TEXTMAP_PATH)
+    print("千星奇域知识库 · 能力清单")
+    print(f"知识库：{len(tm)} 篇官方文档全文快照\n")
+    for c in CAPABILITIES:
+        print(f"[{c['command']}] {c['name']}")
+        print(f"  说明：{c['desc']}")
+        print(f"  入口：{c['cli']}")
+        print(f"  示例：{c['example']}")
+        print()
+
+
 def main():
     parser = argparse.ArgumentParser(description="检索千星奇域官方综合指南知识库")
-    parser.add_argument("query", help="自然语言查询词")
+    parser.add_argument("query", nargs="?", default="", help="自然语言查询词")
+    parser.add_argument("--capabilities", action="store_true", help="列出本技能全部能力")
     parser.add_argument("--limit", type=int, default=5, help="返回文档数，默认 5")
     parser.add_argument("--context", type=int, default=180, help="片段上下文字符数，默认 180")
     parser.add_argument("--doc-id", help="限定在指定 doc_id 内检索")
@@ -123,6 +176,14 @@ def main():
     parser.add_argument("--list-docs", action="store_true", help="列出所有文档 ID 与标题")
     parser.add_argument("--raw-doc", help="输出指定 doc_id 的完整正文")
     args = parser.parse_args()
+
+    if args.capabilities:
+        print_capabilities()
+        return
+
+    if not args.query:
+        parser.print_help()
+        return
 
     textmap = load_json(TEXTMAP_PATH)
     catalog = load_json(CATALOG_PATH)
