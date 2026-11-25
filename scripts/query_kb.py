@@ -24,10 +24,10 @@ CATALOG_PATH = os.path.join(SKILL_DIR, "references", "catalog.json")
 CAPABILITIES = [
     {
         "command": "/query",
-        "cli": 'python3 scripts/query_kb.py "检索词"',
-        "name": "知识库检索问答",
-        "desc": "拆解问题为多组关键词，检索 222 篇官方文档，按原文判定支持/受限/未找到并给证据",
-        "example": "/query 帮我查询一下是否支持2d游戏",
+        "cli": 'python3 scripts/query_kb.py "检索词"（无命中时由 Agent 再搜米游社与 B 站）',
+        "name": "知识库检索问答（含社区兜底）",
+        "desc": "先检索 222 篇官方文档并按原文判定支持/受限；官方未覆盖时分域名搜米游社与 B 站作 B/C 级补充，全部带来源标注，冲突以官方为准",
+        "example": "/query 帮我查询一下是否支持2d游戏；/query 社区有没有吸血装备节点图的教程",
     },
     {
         "command": "/list",
