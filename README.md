@@ -1,21 +1,62 @@
 # 如何使用
 
-最快上手只需两步：
+本仓库按「能力内核 + 平台接入」两层设计，同一份能力可接入不同 Agent 平台。
 
-1. **安装**：把本仓库放到 WorkBuddy 工作区的 `.workbuddy/skills/qianxing-kb/` 目录。
-2. **提问**：在对话里输入 `/query 你想问的问题`，例如：
+| 层 | 内容 | 平台依赖 |
+|---|---|---|
+| **能力内核** | `scripts/query_kb.py` + `references/*.json` | 无。仅需 Python 3 标准库，任何能执行 shell 的平台都能调用 |
+| **接入定义** | `SKILL.md` | 无。frontmatter 与正文用 `<skill_dir>` 占位符，WorkBuddy / DSH 共用同一份 |
+| **调用约定** | 各平台的触发命令 | 有。见下表 |
 
-```
-/query 帮我查询一下是否支持2d游戏
-```
+| 平台 | 把本仓库放到 | 怎么调用 |
+|---|---|---|
+| WorkBuddy | `<工作区>/.workbuddy/skills/qianxing-kb/` | `/query 问题`、`/list` 等斜杠命令 |
+| DSH（DeepSeek Harness） | `<项目根>/.agents/skills/qianxing-kb/`（项目级）或 `~/.agents/skills/qianxing-kb/`（全局） | `/qianxing-kb 问题`，或按 description 自动加载 |
+| 其他 Agent / 纯命令行 | 任意目录 | `python3 <skill_dir>/scripts/query_kb.py "检索词"` |
 
-用 `/list` 查看全部可用命令；也可以不通过 WorkBuddy，直接跑脚本：
+## 接入 WorkBuddy
 
 ```bash
-python3 scripts/query_kb.py "2D Lua 脚本"
+# 仓库根目录即 skill 目录，直接放进工作区
+cp -r qianxing-kb <工作区>/.workbuddy/skills/
 ```
 
-详细参数见下方「用法」章节。
+对话里输入 `/query 帮我查询一下是否支持2d游戏`；`/list` 列出全部命令。详见下方「用法」。
+
+## 接入 DSH（DeepSeek Harness）
+
+DSH 的 Skill 与 Anthropic 格式同构，**本仓库的 `SKILL.md` 可原样使用，无需改一个字**：`name: qianxing-kb` 已是合法的 kebab-case，`description` 已写明何时触发。
+
+```bash
+# 项目级（与其他 Agent 共用；项目根 = 最近的 .git 所在目录）
+cp -r qianxing-kb <项目根>/.agents/skills/qianxing-kb
+
+# 或全局（所有项目可用）
+cp -r qianxing-kb ~/.agents/skills/qianxing-kb
+```
+
+调用方式：
+
+- 手动：输入 `/qianxing-kb 帮我查询一下是否支持2d游戏`
+- 自动：DSH 会话开始时只看到技能名和描述，判断相关时会自行加载正文
+
+**DSH 与 WorkBuddy 的两个差异，别踩坑：**
+
+1. DSH 的 Skill 入口只有一个——`/qianxing-kb`。`/query`、`/list` 这些在本仓库里是**意图**，不是 DSH 的斜杠命令；进入技能后，DSH 会按 `SKILL.md` 的「何时使用」「能力清单」段落识别这些意图。
+2. `SKILL.md` 里的 `<skill_dir>` 在 DSH 中取技能加载返回的 `resourceBase`，即技能目录的绝对路径，不要用当前工作目录去拼。
+
+DSH 只会扫描一层目录（`<root>/<skill-name>/SKILL.md`），不要再套一层分组目录；同名技能按目录优先级取一个，优先级从高到低：`.dsh/skills` → `.agents/skills` → `customSkillDirs` → `~/.dsh/skills` → `~/.agents/skills`。`~/.claude/skills` 不在扫描名单里。
+
+## 接入其他 Agent / 纯命令行
+
+不需要复制整个仓库，只要能执行 shell 命令，把脚本路径指向本仓库即可：
+
+```bash
+python3 <skill_dir>/scripts/query_kb.py "2D Lua 脚本" --limit 3
+python3 <skill_dir>/scripts/query_kb.py --capabilities   # 列出能力
+```
+
+接入方式：给目标 Agent 一段提示词，告诉它「遇到千星奇域知识库问题时运行上述命令，并按输出中的原文证据回答」即可。脚本仅依赖 Python 标准库，检索全程离线。
 
 ---
 
