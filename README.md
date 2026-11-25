@@ -16,6 +16,20 @@
 
 ## 能回答什么问题（能力清单）
 
+## Skill 命令清单
+
+用 `/list` 可随时在对话中列出以下命令；CLI 对应 `--capabilities`。
+
+| 命令 | CLI 入口 | 作用 |
+|---|---|---|
+| `/query` | `python3 scripts/query_kb.py "检索词"` | 检索知识库并带原文证据回答 |
+| `/list` | `python3 scripts/query_kb.py --capabilities` | 列出本技能能力、入口与知识库规模 |
+| `/docs` | `python3 scripts/query_kb.py x --list-docs` | 列出 222 篇文档 ID 与标题 |
+| `/raw` | `python3 scripts/query_kb.py x --raw-doc <doc_id>` | 输出单篇文档全文 |
+| `/update` | 见下方"更新知识库快照" | 重新拉取官方 JSON 覆盖快照 |
+
+## 能回答什么问题（能力清单）
+
 | 能力 | 说明 | 典型提问 |
 |---|---|---|
 | **功能支持判定** | 查某能力是否支持、有无版本/模式前提，给原文证据 | 「是否支持 2D 游戏？」 |
@@ -89,6 +103,7 @@ python3 scripts/query_kb.py "x" --raw-doc mhs2w008wf14
 
 | 参数 | 默认 | 说明 |
 |---|---|---|
+| `--capabilities` | — | 列出本技能能力清单（无需传检索词） |
 | `--limit` | 5 | 返回文档数 |
 | `--context` | 180 | 每个片段的上下文字符数 |
 | `--doc-id` | — | 限定单篇文档 |
