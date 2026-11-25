@@ -1,3 +1,24 @@
+# 如何使用
+
+最快上手只需两步：
+
+1. **安装**：把本仓库放到 WorkBuddy 工作区的 `.workbuddy/skills/qianxing-kb/` 目录。
+2. **提问**：在对话里输入 `/query 你想问的问题`，例如：
+
+```
+/query 帮我查询一下是否支持2d游戏
+```
+
+用 `/list` 查看全部可用命令；也可以不通过 WorkBuddy，直接跑脚本：
+
+```bash
+python3 scripts/query_kb.py "2D Lua 脚本"
+```
+
+详细参数见下方「用法」章节。
+
+---
+
 # qianxing-kb
 
 > 米哈游《原神》千星奇域（Miliastra Wonderland）官方综合指南的**离线知识库 + 检索技能**。
@@ -13,8 +34,6 @@
 - 抽取地址：`https://act-webstatic.mihoyo.com/ugc-tutorial/knowledge/cn/zh-cn/` 下的 `textMap.json` / `catalog.json` / `headingsMap.json`
 - 快照时间：2026-11-25；目录最后更新约 2026-10-10，正文含 7.2 版本（2026/11/04）更新日志
 - 文档总量：**222 篇**
-
-## 能回答什么问题（能力清单）
 
 ## Skill 命令清单
 
